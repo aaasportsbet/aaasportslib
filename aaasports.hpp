@@ -1,6 +1,8 @@
 #pragma once
 #include <eosiolib/asset.hpp>
+#include <eosiolib/action.hpp>
 #include <eosiolib/contract.hpp>
+#include <eosiolib/currency.hpp>
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/multi_index.hpp>
 #include <string>
@@ -10,6 +12,10 @@ namespace aaasportslib
 {
 using namespace eosio;
 using namespace std;
+
+constexpr static const account_name eosiotoken = N("eosio.token");
+/// token out of account
+constexpr static const permission_name tokenoutp = N("token.out");
 
 /// check issuer permission
 static inline void checkissuerperm(const account_name &issuer,
@@ -21,7 +27,7 @@ static inline void checkissuerperm(const account_name &issuer,
 }
 
 /// check player perm
-static inline void checkplayerperm(const name &player)
+static inline void checkplayerperm(const account_name &player)
 {
   eosio_assert(is_account(player), "player account does not exist");
   require_auth(player);
@@ -33,17 +39,6 @@ static inline void checkasset(const asset &a)
   eosio_assert(a.is_valid(), "invalid asset");
   eosio_assert(a.amount > 0, "must bet positive quantity");
 }
-
-/// tranfer token args
-struct transfer_args
-{
-  name from;
-  name to;
-  asset quantity;
-  string memo;
-};
-
-constexpr static const account_name eosiotoken = N("eosio.token");
 
 // string split
 static inline vector<string> split(string strtem, char a)
@@ -64,12 +59,20 @@ static inline vector<string> split(string strtem, char a)
   return strvec;
 }
 
-/// token transfer
-void token_transfer(const permission_level &perm, const account_name &from,
-                    const name &to, const asset &quant, const string memo)
+/// tranfer token args
+struct transfer_args
 {
-  action(perm, eosiotoken, N("transfer"), transfer_args{from, to, quant, memo})
-      .send();
+  account_name from;
+  account_name to;
+  asset quantity;
+  string memo;
+};
+
+/// token transfer
+void token_transfer(const permission_name perm, const account_name &from,
+                    const account_name &to, const asset &quant, const string memo)
+{
+  currency::inline_transfer(from, to, extended_asset(quant, eosiotoken), memo, perm);
 }
 
 } // namespace aaasportslib

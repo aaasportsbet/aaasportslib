@@ -18,8 +18,8 @@ constexpr static const account_name eosiotoken = N("eosio.token");
 constexpr static const permission_name tokenoutp = N("token.out");
 
 /// check issuer permission
-static inline void checkissuerperm(const account_name &issuer,
-                                   const account_name &perm)
+static inline void checkissuerperm(const account_name issuer,
+                                   const permission_name perm)
 {
   // only has nbaissuer permission account can put this action
   eosio_assert(is_account(issuer), "issuer account does not exist");
@@ -27,7 +27,7 @@ static inline void checkissuerperm(const account_name &issuer,
 }
 
 /// check player perm
-static inline void checkplayerperm(const account_name &player)
+static inline void checkplayerperm(const account_name player)
 {
   eosio_assert(is_account(player), "player account does not exist");
   require_auth(player);

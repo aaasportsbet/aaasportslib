@@ -1,0 +1,22 @@
+{
+    "files.associations": {
+        "__functional_base": "cpp",
+        "memory": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp",
+        "__bit_reference": "cpp",
+        "__string": "cpp",
+        "algorithm": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "array": "cpp",
+        "initializer_list": "cpp",
+        "__split_buffer": "cpp",
+        "iterator": "cpp",
+        "vector": "cpp",
+        "bitset": "cpp",
+        "istream": "cpp",
+        "locale": "cpp",
+        "__locale": "cpp"
+    }
+}

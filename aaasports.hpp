@@ -1,67 +1,70 @@
 #pragma once
-#include <eosiolib/asset.hpp>
 #include <eosiolib/action.hpp>
+#include <eosiolib/asset.hpp>
 #include <eosiolib/contract.hpp>
 #include <eosiolib/currency.hpp>
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/multi_index.hpp>
 #include <string>
 #include <vector>
+#define DEBUG
+#include "logger.hpp"
 
-namespace aaasportslib
-{
+namespace aaasportslib {
 using namespace eosio;
 using namespace std;
 
+static const uint64_t default_public_duration =
+    7200000000; // 2 * 60 * 60 * 1000 * 1000
+static const uint8_t default_bet_fee_percent = 1;
 constexpr static const account_name eosiotoken = N("eosio.token");
 /// token out of account
-constexpr static const permission_name tokenoutp = N("token.out");
+constexpr static const permission_name default_tokenoutp = N("token.out");
 
-/// check issuer permission
-static inline void checkissuerperm(const account_name issuer,
-                                   const permission_name perm)
-{
-  // only has nbaissuer permission account can put this action
-  eosio_assert(is_account(issuer), "issuer account does not exist");
-  require_auth(permission_level(issuer, perm));
-}
-
-/// check player perm
-static inline void checkplayerperm(const account_name player)
-{
-  eosio_assert(is_account(player), "player account does not exist");
-  require_auth(player);
+/// check permission
+static inline void checkperm(const account_name &acc,
+                             const permission_name &perm = N(active)) {
+  eosio_assert(is_account(acc), "account does not exist");
+  require_auth(permission_level(acc, perm));
 }
 
 /// check asset
-static inline void checkasset(const asset &a)
-{
+static inline void checkasset(const asset &a) {
   eosio_assert(a.is_valid(), "invalid asset");
   eosio_assert(a.amount > 0, "must bet positive quantity");
 }
 
-// string split
-static inline vector<string> split(string strtem, char a)
-{
-  vector<string> strvec;
+template <typename T = uint64_t>
+static inline T convert(std::string const &value) {
+  logger_info("conver value: ", value);
+  T result = 0;
 
-  string::size_type pos1, pos2;
-  pos2 = strtem.find(a);
-  pos1 = 0;
-  while (string::npos != pos2)
-  {
-    strvec.push_back(strtem.substr(pos1, pos2 - pos1));
+  bool neg = false;
+  char const *p = value.c_str();
+  char const *q = p + value.size();
 
-    pos1 = pos2 + 1;
-    pos2 = strtem.find(a, pos1);
+  // check neg
+  if (*p == '-') {
+    neg = true;
+    ++p;
+  } else if (*p == '+') {
+    neg = false;
+    ++p;
   }
-  strvec.push_back(strtem.substr(pos1));
-  return strvec;
+
+  while (p < q) {
+    result = (result << 1) + (result << 3) + *(p++) - '0';
+  }
+
+  if (neg) {
+    result = -result;
+  }
+
+  return result;
 }
 
 /// tranfer token args
-struct transfer_args
-{
+struct transfer_args {
   account_name from;
   account_name to;
   asset quantity;
@@ -70,9 +73,18 @@ struct transfer_args
 
 /// token transfer
 void token_transfer(const permission_name perm, const account_name &from,
-                    const account_name &to, const asset &quant, const string memo)
-{
-  currency::inline_transfer(from, to, extended_asset(quant, eosiotoken), memo, perm);
+                    const account_name &to, const asset &quant,
+                    const string memo) {
+  currency::inline_transfer(from, to, extended_asset(quant, eosiotoken), memo,
+                            perm);
+}
+
+/// calc bet unit fee
+static const asset &getbetfee(const asset &unit) {
+  auto fee = unit / 100 * default_bet_fee_percent;
+  checkasset(fee);
+
+  return fee;
 }
 
 } // namespace aaasportslib

@@ -10,31 +10,35 @@ using namespace std;
 class supervisorbase
 {
 public:
-  supervisorbase(account_name n) : _self(n), _supervisors(n, n), _challengerecs(n, n) {}
+  supervisorbase(account_name n)
+      : _self(n), _supervisors(n, n), _challenges(n, n) {}
 
-  // @abi table supervisors i64
+  // @abi table
   struct supervisor
   {
     uint64_t id;
-    account_name player;                    // player account name
-    asset bet_quant;                        // player bet how much to become a supervisor
-    uint64_t round_id;                      // which round the player be selected
-    uint64_t challenge_count = 0;           // how many times the player disagree with round public result
-    asset award_quant;                      // the award for a supervisor
-    uint8_t left_round = MAX_WITNESS_COUNT; // how many round left for a player can witness
+    account_name player; // player account name
+    asset bet_quant;     // player bet how much to become a supervisor
+    uint64_t round_id;   // which round the player be selected
+    uint64_t challenge_count =
+        0;             // how many times the player disagree with round public result
+    asset award_quant; // the award for a supervisor
+    uint8_t left_round =
+        MAX_WITNESS_COUNT; // how many round left for a player can witness
 
     uint64_t primary_key() const { return id; }
 
-    EOSLIB_SERIALIZE(
-        supervisor, (id)(player)(bet_quant)(round_id)(challenge_count)(award_quant)(left_round))
+    EOSLIB_SERIALIZE(supervisor, (id)(player)(bet_quant)(round_id)(
+                                     challenge_count)(award_quant)(left_round))
   };
 
-  typedef eosio::multi_index<N("supervisor"), supervisor> supervisors;
+  typedef eosio::multi_index<N(supervisors), supervisor> supervisors;
   /// supervisors
   supervisors _supervisors;
 
   /// add a new supervisor
-  void _addsupervisor(const account_name &player, const uint64_t &round_id, const asset &quant)
+  void _addsupervisor(const account_name &player, const uint64_t &round_id,
+                      const asset &quant)
   {
     for (auto &item : _supervisors)
     {
@@ -79,8 +83,8 @@ public:
     return false;
   }
 
-  /// @abi table challengerecs i64
-  struct challengerec
+  /// @abi table
+  struct challenge
   {
     uint64_t id;
     uint64_t round_id;
@@ -90,15 +94,15 @@ public:
     uint64_t primary_key() const { return id; }
     uint64_t byround() const { return round_id; }
 
-    EOSLIB_SERIALIZE(
-        challengerec, (id)(player)(round_id)(memo))
+    EOSLIB_SERIALIZE(challenge, (id)(player)(round_id)(memo))
   };
-  typedef eosio::multi_index<N("challengerec"), challengerec> challengerecs;
-  /// challengerecs
-  challengerecs _challengerecs;
+  typedef eosio::multi_index<N(challenges), challenge> challenges;
+  /// challenges
+  challenges _challenges;
 
   /// @abi action
-  void challenge(const account_name &player, const uint64_t &round_id, const string &memo)
+  void challengebet(const account_name &player, const uint64_t &round_id,
+                    const string &memo)
   {
     checkperm(player);
 

@@ -17,6 +17,9 @@
         "bitset": "cpp",
         "istream": "cpp",
         "locale": "cpp",
-        "__locale": "cpp"
-    }
+        "__locale": "cpp",
+        "map": "cpp",
+        "set": "cpp"
+    },
+    "editor.formatOnSave": true
 }

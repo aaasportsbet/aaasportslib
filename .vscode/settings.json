@@ -19,7 +19,8 @@
         "locale": "cpp",
         "__locale": "cpp",
         "map": "cpp",
-        "set": "cpp"
+        "set": "cpp",
+        "typeinfo": "cpp"
     },
     "editor.formatOnSave": true
 }

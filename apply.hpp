@@ -1,29 +1,32 @@
 #include "aaasports.hpp"
 #include <eosiolib/eosio.hpp>
+#include <eosiolib/name.hpp>
 
-namespace aaasportslib {
+namespace aaasportslib
+{
 using namespace eosio;
 
-#define EOSIO_ABI_EX(TYPE, MEMBERS)                                            \
-  extern "C" {                                                                 \
-  void apply(uint64_t receiver, uint64_t code, uint64_t action) {              \
-    if (action == N(onerror)) {                                                \
-      /* onerror is only valid if it is for the "eosio" code account and       \
-       * authorized by "eosio"'s                                               \
-       * "active permission */                                                 \
-      eosio_assert(code == N(eosio), "onerror action's are only valid from "   \
-                                     "the \"eosio\" system account");          \
-    }                                                                          \
-    auto self = receiver;                                                      \
-                                                                               \
-    if ((code == self && action != N(transfer)) ||                             \
-        (code == N(eosio.token) && action == N(transfer)) ||                   \
-        action == N(onerror)) {                                                \
-      TYPE thiscontract(self);                                                 \
-      switch (action) { EOSIO_API(TYPE, MEMBERS) }                             \
-      /* does not allow destructor of thiscontract to run: eosio_exit(0); */   \
-    }                                                                          \
-  }                                                                            \
+#define EOSIO_ABI_EX(TYPE, MEMBERS)                                                                                          \
+  extern "C"                                                                                                                 \
+  {                                                                                                                          \
+    void apply(uint64_t receiver, uint64_t code, uint64_t action)                                                            \
+    {                                                                                                                        \
+      if (name(action) == "onerror"_n)                                                                                       \
+      {                                                                                                                      \
+        eosio_assert(name(code) == "eosio"_n,                                                                                \
+                     "onerror action's are only valid from "                                                                 \
+                     "the \"eosio\" system account");                                                                        \
+      }                                                                                                                      \
+      auto self = receiver;                                                                                                  \
+                                                                                                                             \
+      if ((code == self && name(action) != "transfer"_n) || (name(code) == "eosio.token"_n && name(action) == "transfer"_n)) \
+      {                                                                                                                      \
+        switch (action)                                                                                                      \
+        {                                                                                                                    \
+          EOSIO_DISPATCH_HELPER(TYPE, MEMBERS)                                                                               \
+        }                                                                                                                    \
+      }                                                                                                                      \
+    }                                                                                                                        \
   }
 
 } // namespace aaasportslib
